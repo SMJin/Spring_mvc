@@ -19,3 +19,23 @@
 - War Packaging
 - Spring Boot 3.2.2
 - IDE : Intellij 사용
+
+## HttpServlet 클래스
+- 서블릿 클래스가 되기 위해서는 다음과 같은 순서의 *생명주기*를 가져야 한다.
+- ★ **init()** -> **service()** -> **destroy()**
+- HttpSevletRequest 클래스와 HTtpServletResponse 클래스의 객체를 파라미터로 받는다.
+- HttpServlet 메소드는 HTTP 요청에 따라 service 메소드의 실행이 8가지로 분리되는데, 그중 가장 기본적으로 사용되는 4가지가 다음과 같다.
+- **POST, GET, PUT, DELETE**
+- **doPost(), doGet(), doPut(), doDelete()**
+
+## HttpServletRequest
+- http 요청 메시지를 직접 파싱하지 않고 개발자 대신 요청 메시지를 파싱해주는 클래스이다.
+- START LINE 구성 (HTTP메소드, URL, 쿼리스트링, 스키마/프로토콜)
+- 헤더 구성 (헤더)
+- 바디 구성 (form 파라미터 형식 조회, message body 데이터 직접 조회)
+#### 임시 저장소 기능
+- 해당 HTTP 요청이 시작했을 때부터 끝날 때까지 유지되는 임시 저장소 기능
+- 저장 : *request.setAttribute(name, value)*
+- 조회 : *request.getAttribute(name)*
+#### 세선 관리 기능
+- *request.getSession(create: true)*
