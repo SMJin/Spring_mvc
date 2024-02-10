@@ -12,4 +12,10 @@
 - WAR 파일을 실행하려면 Tomcat 과 같은 웹 서버 혹은 웹 컨테이너가 필요하다.
 - ***즉, WAR는 웹서버 혹은 WAS(웹 컨테이너)가 있으야 구동이 가능하다.**
 
-## 서블릿 프로젝트에서는 jsp를 사용할 것이기 때문에 WAR 파일로 구동을 할 것이다.
+### 서블릿 프로젝트에서는 jsp를 사용할 것이기 때문에 WAR 파일로 구동을 할 것이다.
+### Servlet Project 환경
+- Gradle(Groovy)
+- Java 17
+- War Packaging
+- Spring Boot 3.2.2
+- IDE : Intellij 사용
