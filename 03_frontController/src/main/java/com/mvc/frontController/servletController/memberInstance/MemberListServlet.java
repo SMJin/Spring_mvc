@@ -1,7 +1,9 @@
-package com.mvc.frontController.servletController;
+package com.mvc.frontController.servletController.memberInstance;
 
 import com.mvc.frontController.domain.Member;
 import com.mvc.frontController.domain.MemberRepository;
+import com.mvc.frontController.servletController.MemberServletInterface;
+import com.mvc.frontController.servletController.MyView;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,13 +16,11 @@ public class MemberListServlet implements MemberServletInterface {
 
     private MemberRepository memberRepository = MemberRepository.getInstance();
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public MyView process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Member> members = memberRepository.findAll();
 
         request.setAttribute("members", members);
 
-        String viewPath = "/WEB-INF/views/members.jsp";
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
-        dispatcher.forward(request, response);
+        return new MyView("/WEB-INF/views/members.jsp");
     }
 }

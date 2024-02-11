@@ -1,5 +1,8 @@
 package com.mvc.frontController.servletController;
 
+import com.mvc.frontController.servletController.memberInstance.MemberFormServlet;
+import com.mvc.frontController.servletController.memberInstance.MemberListServlet;
+import com.mvc.frontController.servletController.memberInstance.MemberSaveServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,6 +32,7 @@ public class FrontServletController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        controller.process(request, response);
+        MyView view = controller.process(request, response);
+        view.render(request, response);
     }
 }
