@@ -32,7 +32,22 @@ public class FrontServletController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        MyView view = controller.process(request, response);
-        view.render(request, response);
+
+        Map<String, String> paramMap = createParamMap(request);
+
+        ModelView mv = controller.process(paramMap);
+        MyView view = viewResolver(mv);
+        view.render(mv.getModel(), request, response);
+    }
+
+    private MyView viewResolver(ModelView modelView) {
+        return new MyView("/WEB-INF/views/" + modelView.getViewName() + ".jsp");
+    }
+
+    private Map<String, String> createParamMap(HttpServletRequest request) {
+        Map<String, String> paramMap = new HashMap<>();
+        request.getParameterNames().asIterator()
+                .forEachRemaining(paramName -> paramMap.put(paramName, request.getParameter(paramName)));
+        return paramMap;
     }
 }
