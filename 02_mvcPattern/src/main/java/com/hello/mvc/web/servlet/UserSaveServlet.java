@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet
+@WebServlet(name = "userSaveServlet", urlPatterns = "/servlet/users/save")
 public class UserSaveServlet extends HttpServlet {
 
     private UserRepository userRepository = UserRepository.getInstance();
