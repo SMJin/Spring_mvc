@@ -12,16 +12,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-@WebServlet(name = "FrontServletControllerV1", urlPatterns = "/front-controller/v1/*")
+@WebServlet(name = "FrontServletController", urlPatterns = "/front-controller/*")
 public class FrontServletController extends HttpServlet {
 
     private Map<String, MemberServletInterface> controllerMap = new HashMap<>();
 
     public FrontServletController() {
-        controllerMap.put("/front-controller/v1/members/new-form", new MemberFormServlet());
-        controllerMap.put("/front-controller/v1/members/save", new MemberSaveServlet());
-        controllerMap.put("/front-controller/v1/members", new MemberListServlet());
+        controllerMap.put("/front-controller/members/new-form", new MemberFormServlet());
+        controllerMap.put("/front-controller/members/save", new MemberSaveServlet());
+        controllerMap.put("/front-controller/members", new MemberListServlet());
     }
 
     @Override
@@ -34,14 +35,16 @@ public class FrontServletController extends HttpServlet {
         }
 
         Map<String, String> paramMap = createParamMap(request);
+        Map<String, Object> model = new HashMap<>();
 
-        ModelView mv = controller.process(paramMap);
-        MyView view = viewResolver(mv);
-        view.render(mv.getModel(), request, response);
+        String viewName = controller.process(paramMap, model);
+
+        MyView view = viewResolver(viewName);
+        view.render(model, request, response);
     }
 
-    private MyView viewResolver(ModelView modelView) {
-        return new MyView("/WEB-INF/views/" + modelView.getViewName() + ".jsp");
+    private MyView viewResolver(String viewName) {
+        return new MyView("/WEB-INF/views/" + viewName + ".jsp");
     }
 
     private Map<String, String> createParamMap(HttpServletRequest request) {

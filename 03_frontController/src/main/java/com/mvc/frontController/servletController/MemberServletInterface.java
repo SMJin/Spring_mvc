@@ -8,5 +8,10 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface MemberServletInterface {
-    ModelView process(Map<String, String> paramMap) throws ServletException, IOException;
+    /**
+     * @param paramMap
+     * @param model
+     * @return viewName
+     */
+    String process(Map<String, String> paramMap, Map<String, Object> model);
 }
