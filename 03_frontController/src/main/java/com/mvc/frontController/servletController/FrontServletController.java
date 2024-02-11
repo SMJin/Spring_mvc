@@ -17,19 +17,18 @@ public class FrontServletController extends HttpServlet {
 
     public FrontServletController() {
         controllerMap.put("/front-controller/v1/members/new-form", new MemberFormServlet());
+        controllerMap.put("/front-controller/v1/members/save", new MemberSaveServlet());
+        controllerMap.put("/front-controller/v1/members", new MemberListServlet());
     }
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         MemberServletInterface controller = controllerMap.get(requestURI);
-        System.out.println(requestURI);
-        System.out.println(controllerMap.get(requestURI));
         if (controller == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-
         controller.process(request, response);
     }
 }
