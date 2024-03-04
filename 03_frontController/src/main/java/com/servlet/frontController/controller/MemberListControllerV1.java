@@ -19,9 +19,8 @@ public class MemberListControllerV1 implements ControllerV1 {
 
     MemberRepository memberRepository = MemberRepository.getInstance();
     @Override
-    public ModelView process(Map<String, String> paramMap) {
-        ModelView modelView = new ModelView("members");
-        modelView.getModel().put("members", memberRepository.findAll());
-        return modelView;
+    public String process(Map<String, String> paramMap, Map<String, Object> model) {
+        model.put("members", memberRepository.findAll());
+        return "members";
     }
 }
