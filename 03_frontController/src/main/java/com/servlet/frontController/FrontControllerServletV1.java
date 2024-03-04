@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.Banner;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,7 +36,22 @@ public class FrontControllerServletV1 extends HttpServlet {
             return;
         }
 
-        MyView myView = controller.process(request, response);
-        myView.render(request, response);
+        Map<String, String> paramMap = createParamMap(request);
+        ModelView modelView = controller.process(paramMap);
+
+        String viewName = modelView.getViewName();
+        MyView myView = viewResolver(viewName);
+
+        myView.render(modelView.getModel(), request, response);
+    }
+
+    private MyView viewResolver(String viewName) {
+        return new MyView("/WEB-INF/views/" + viewName + ".jsp");
+    }
+    private Map<String, String> createParamMap(HttpServletRequest request) {
+        Map<String, String> paramMap = new HashMap<>();
+        request.getParameterNames().asIterator()
+                .forEachRemaining(paramName -> paramMap.put(paramName, request.getParameter(paramName)));
+        return paramMap;
     }
 }
