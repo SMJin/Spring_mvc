@@ -1,6 +1,7 @@
 package com.servlet.frontController.controller;
 
 import com.servlet.frontController.ControllerV1;
+import com.servlet.frontController.MyView;
 import com.servlet.frontController.domain.Member;
 import com.servlet.frontController.domain.MemberRepository;
 import jakarta.servlet.RequestDispatcher;
@@ -14,7 +15,7 @@ public class MemberSaveControllerV1 implements ControllerV1 {
 
     private MemberRepository memberRepository = MemberRepository.getInstance();
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public MyView process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         int age = Integer.parseInt(request.getParameter("age"));
 
@@ -23,8 +24,6 @@ public class MemberSaveControllerV1 implements ControllerV1 {
 
         request.setAttribute("member", member);
 
-        String viewPath = "/WEB-INF/views/save-result.jsp";
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
-        dispatcher.forward(request, response);
+        return new MyView("/WEB-INF/views/save.jsp");
     }
 }

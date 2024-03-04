@@ -1,5 +1,5 @@
-<%@ page import="com.hello.mvc.domain.MemberRepository" %>
-<%@ page import="com.hello.mvc.domain.Member" %>
+<%@ page import="com.servlet.frontController.domain.MemberRepository" %>
+<%@ page import="com.servlet.frontController.domain.Member" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
      MemberRepository memberRepository = MemberRepository.getInstance();
@@ -8,7 +8,7 @@
      int age = Integer.parseInt(request.getParameter("age"));
      Member member = new Member(username, age);
      System.out.println("user = " + member);
-     MemberRepository.save(member);
+     memberRepository.save(member);
 %>
 <html>
 <head>

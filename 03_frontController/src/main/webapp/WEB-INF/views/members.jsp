@@ -1,6 +1,6 @@
 <%@ page import="java.util.List" %>
-<%@ page import="com.hello.mvc.domain.UserRepository" %>
-<%@ page import="com.hello.mvc.domain.UserVo" %>
+<%@ page import="com.servlet.frontController.domain.MemberRepository" %>
+<%@ page import="com.servlet.frontController.domain.Member" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
  MemberRepository memberRepository = MemberRepository.getInstance();
