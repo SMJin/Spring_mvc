@@ -5,14 +5,24 @@
 #### webapp vs WEB-INF
 - webapp은 jsp와 같은 정적파일을 정적주소자체로 접근할 수 있는 반면,
 - WEB-INF는 컨트롤러를 통해서만 접근이 가능하다. 보안성이 더 뛰어난 것이다.
-### Servlet 종속성을 제거하기
-1. frontController를 따로 빼서, 모든 컨트롤러를 하나의 컨트롤로 모이게 관리한다. (공통 interface 활용)
-2. View 객체 생성 => ViewPath 정보를 따로 담아서 RequestDispatcher로 forward한다.
-3. View 객체에는 Model 정보도 들어있다 => request.setAttribute(key, value) 를 이용하여 model 값도 넘겨준다.
-4. 즉, View 객체에서만 HttpServletReqeust 와 HttpServletResponse를 건드린다. 다른 컨트롤러는 paramMap으로 값을 관리한다.
-5. ModelView 객체 생성 => ViewName 과 Model 정보만을 관리하는 객체를 생성한다.
-6. ViewResolver를 이용하여 ModelView 의 viewName을 View의 viewPath로 변환한다.
-7. ModelView를 반환하다가, model 객체를 frontController에서 직접 관리하면서 model을 파라미터로 관리하도록 한다.
+## Servlet 종속성을 제거하기
+#### frontController 생성
+- frontController를 따로 빼서, 모든 컨트롤러를 하나의 컨트롤러로 모이게 관리한다. (공통 interface 활용)
+- 이때 컨트롤러를 관리하는 Map을 만들어서 <String(ViewPath), Controller Interface> 타입으로 관리한다.
+#### View 객체 생성
+- ViewPath 정보를 관리하도록 private String 으로 선언한다.
+- render(request, response) 메소드를 활용하여 RequestDispatche로 viewPath를 담아 forward한다.
+- (이후에 추가되지만) View 객체에는 Model 정보도 들어있는 render(model, request, response) 메소드도 만든다.
+- model 정보를 넘기기 위해서는 request.setAttribute(key, value) 를 활용해서 request 객체에 담는다.
+- 즉, View 객체에서만 *HttpServletReqeust*와 *HttpServletResponse*를 건드린다.
+- 다른 컨트롤러들은 paramMap으로 값을 관리한다.
+#### ModelView 객체 생성
+- ViewName 정보와 Model 정보를 관리하는 객체를 생성한다. (각각 String, Map<String,Obejct>)
+- frontController에서 ViewResolver(viewName) 메소드를 이용하여 return viewPath 로 변환해주는 메소드를 생성한다.
+- 즉, ViewResolver 에서 viewName을 => viewPath로 변환해주는 역할을 하는 것이다.
+- ModelView 안에 넣어진 Model 객체는 frontController에서 직접 관리하는 것이다.
+- Model 객체는 Map<String, Obejct> 의 형식으로 frontController에서 파라미터로 관리된다.
+#### frontController에 Adapter Pattern 적용
 
 ## 맞딱트린 오류
 #### jsp 파일 접근만 하면 자꾸 jsp 파일이 다운로드 됨
