@@ -44,3 +44,12 @@
 #### HttpReqeustHandler의 경우, HandlerMapping/Adapter의 요청 흐름
    - HandlerMapping = BeanNameUrlHandlerMapping
    - HandlerAdapter = HttpReqeustHandlerAdapter
+
+## ViewResolver
+- application.properties에 다음과 같은 설정정보를 등록하고 사용한다
+```
+spring.mvc.view.prefix=/WEB-INF/views/
+spring.mvc.view.suffix=.jsp
+```
+- 1 = ***BeanNameViewResolver*** : Bean 이름으로 View를 찾아서 반환
+- 2 = ***InternalResourceViewResolver*** : JSP를 처리할 수 있는 뷰를 반환 (forward()를 호출하여 처리할 수 있는 경우에 해당) (RequestDispatcher.forward(request, response))
