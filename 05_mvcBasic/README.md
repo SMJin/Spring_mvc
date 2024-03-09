@@ -112,3 +112,16 @@ return new ResponseEntity<String>("Hello World", responseHeaders, HttpStatus.CRE
 - 요청 파라미터 vs HTTP 메시지 바디
 - 요청 파라미터를 조회하는 기능: @RequestParam , @ModelAttribute
 - HTTP 메시지 바디를 직접 조회하는 기능: @RequestBody
+
+## Http response
+#### 스프링(서버)에서 응답 데이터를 만드는 방법
+1. 정적 리소스 
+ - (ex.) 웹 브라우저에 정적인 HTML, css, js를 제공할 때는, 정적 리소스를 사용한다.
+ - 경로 src/main/resources/static
+2. 뷰 템플릿 사용 (ex. tymeleaf 등)
+ - (ex.) 웹 브라우저에 동적인 HTML을 제공할 때는 뷰 템플릿을 사용한다.
+ - 경로 src/main/resources/templates
+ - tymeleaf 관련되어 application.properties에 추가할 수 있는 여러 속성들을 보고 싶다면, 공식문서에 ***Templating Properties***를 참고하라.
+3. HTTP 메시지 사용 (HTTP API를 제공하는 경우에는 HTML이 아니라 데이터를 전달해야 하므로, HTTP 메시지 바디에 JSON 같은 형식으로 데이터를 실어 보낸다.)
+ - @RestController = @ResponseBody + @Controller
+ - return ResponseBody<>(helloData, HttpStatus.OK);
