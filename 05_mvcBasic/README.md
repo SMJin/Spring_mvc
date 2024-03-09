@@ -71,3 +71,44 @@ logging.level.hello.springmvc=debug
 ```
 - 이런식으로 사용하면, request header의 Accept key기반으로 매핑이 되는데,
 - 즉 Client가 어떤 형식으로 받을 건지 지정하는 것이다.
+
+## HTTP request
+#### header 정보
+- 공식문서 >  Method Arguments 페이지에서 알 수 있는 여러가지 헤더 정보를 알 수 있다.
+```
+// 예시
+HttpServletRequest request,
+HttpServletResponse response,
+HttpMethod httpMethod,
+Locale locale,
+@RequestHeader MultiValueMap<String, String> headerMap,
+@RequestHeader("host") String host,
+@CookieValue(value = "myCookie", required = false) String cookie
+```
+#### HTTP 요청 파라미터
+1. **GET - query parameter** (ex. String username = request.getParameter("username"))
+2. **POST - HTML form** (ex. @RequestParam("username") String memberName)
+  - required = false 면 파라미터에 없어도 된다. true면 무조건 있어야 한다.
+  - defaultValue = "guest" 와 같이 기본 값을 지정해주면 값이 없을때 기본값을 배정해준다.
+  - Map<String, Object> paramMap 과 같은 형태로 map으로 받아올 수도 있다. 꺼내쓸땐 paramMap.get("username") 과 같이 호출하면 된다.
+  - dataVo 에 롬복 @Data를 선언하면 @Getter , @Setter , @ToString , @EqualsAndHashCode , @RequiredArgsConstructor 를 자동으로 적용해준다.
+  - @ModelAttribute 를 지정하면 VO Class 객체로 된 값을 파라미터로 받아온다.
+3. **HTTP message body** 에 데이터 담아 직접 요청
+  - Http message body에 데이터(ex. JSON, XML, TEXT)를 직접 담아서 요청
+  - Http method는 POST, PUT, PATCH 이다.
+  - 이런 경우에는 @RequestParam, @ModelAttribute를 사용할 수 없다.
+  - InputStream으로 messageBody 값을 가져올 수 있다. request.getInputStream()
+  - ☆★ ***HttpEntity***<String> httpEntity를 이용하면 InputStream도 필요없다.
+  - 즉, HttpEntity는 HTTP header, body 정보를 편리하게 조회할 수 있게 한다.
+  - 이때 HttpEntity를 상속받은 두 개의 객체가 존재한다.
+  - 1) RequestEntity :: HttpMethod, url 정보가 추가, 요청에서 사용
+  - 2) ResponseEntity :: HTTP 상태 코드 설정 가능, 응답에서 사용
+```
+return new ResponseEntity<String>("Hello World", responseHeaders, HttpStatus.CREATED)
+```
+  - @RequestBody 를 사용하면 HTTP 메시지 바디 정보를 편리하게 조회
+  -  참고로 헤더 정보가 필요하다면 HttpEntity 를 사용하거나 @RequestHeader 를 사용하면 된다.
+#### 정리
+- 요청 파라미터 vs HTTP 메시지 바디
+- 요청 파라미터를 조회하는 기능: @RequestParam , @ModelAttribute
+- HTTP 메시지 바디를 직접 조회하는 기능: @RequestBody
