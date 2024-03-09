@@ -44,3 +44,30 @@ logging.level.hello.springmvc=debug
 2. 로그 레벨에 따라 개발 서버에서는 모든 로그를 출력하고, 운영서버에서는 출력하지 않는 등 로그를 상황에 맞게 조절할 수 있다.
 3. System.out.println에만 출력하는 것이 아니라, 파일이나 네트워크 등, 로그를 별도의 위치에 남길 수 있다. 특히 파일로 남길 때는 일별, 특정 용량에 따라 로그를 분할하는 것도 가능하다.
 4. 성능도 일반 System.out보다 좋다. (내부 버퍼링, 멀티 쓰레드 등등) 그래서 실무에서는 꼭 로그를 사용해야 한다.
+
+## RequestMapping
+#### @PathVariable
+- 말그대로 *경로 변수* 이다.
+- 경로 변수는 중괄호 {userId}로 둘러싸인 형태로 @RequestMapping URL에서 사용된다.
+- 메소드 내에서 지정한 경로 변수와 parameter 값이 같다면 이름 지정을 생략할 수 있다.
+#### params 특정 파라미터 조건 매핑
+```
+@GetMapping(value = "/mapping-param", params = "mode=debug")
+```
+- 이런식으로 사용하면, 다음과 같이 url에 반드시 mode=debug가 포함되어야 한다.
+- http://localhost:8080/mapping-param?mode=debug
+#### headers 특정 헤더 조건 매핑
+```
+@GetMapping(value = "/mapping-header", headers = "mode=debug")
+```
+- 이런식의로 사용하면, 요청을 보낼때 request header에 key값이 mode인 조건의 value값이 debug여야 한다.
+#### Content-Type 매핑 consume, produces
+```
+@PostMapping(value = "/mapping-consume", consumes = "application/json")
+```
+- 이런식으로 사용하면, request header의 Content-Type 이 json 이어야 한다.
+```
+@PostMapping(value = "/mapping-produce", produces = "text/html")
+```
+- 이런식으로 사용하면, request header의 Accept key기반으로 매핑이 되는데,
+- 즉 Client가 어떤 형식으로 받을 건지 지정하는 것이다.
