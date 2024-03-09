@@ -125,3 +125,12 @@ return new ResponseEntity<String>("Hello World", responseHeaders, HttpStatus.CRE
 3. HTTP 메시지 사용 (HTTP API를 제공하는 경우에는 HTML이 아니라 데이터를 전달해야 하므로, HTTP 메시지 바디에 JSON 같은 형식으로 데이터를 실어 보낸다.)
  - @RestController = @ResponseBody + @Controller
  - return ResponseBody<>(helloData, HttpStatus.OK);
+
+## HttpMessageConverter 란?
+- @ResponseBody 를 사용 :: HTTP의 BODY에 문자 내용을 직접 반환
+- viewResolver 대신에 HttpMessageConverter 가 동작
+- 1. 기본 문자처리: StringHttpMessageConverter
+- 2. 기본 객체처리: MappingJackson2HttpMessageConverter
+- 즉, 스프링 MVC는 다음의 경우에 HTTP 메시지 컨버터를 적용한다.
+- 1. HTTP 요청: @RequestBody , HttpEntity(RequestEntity) ,
+- 2. HTTP 응답: @ResponseBody , HttpEntity(ResponseEntity) , 
