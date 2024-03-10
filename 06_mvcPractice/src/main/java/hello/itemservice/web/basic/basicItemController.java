@@ -50,18 +50,32 @@ public class basicItemController {
 
     @PostMapping("/add")
     public String addItem(
-            @ModelAttribute Item item,
-            Model model) {
+            @ModelAttribute Item item
+//            , Model model
+    ) {
         itemRepository.save(item);
 
-        model.addAttribute("item", item);
+//        model.addAttribute("item", item);
         return "basic/item";
     }
 
     @GetMapping("/{itemId}/edit")
-    public String addForm(
-            @PathVariable Long itemId
+    public String editForm(
+            @PathVariable Long itemId,
+            Model model
     ) {
-        return "basic/addForm";
+        Item item = itemRepository.findById(itemId);
+        model.addAttribute("item", item);
+        return "basic/editForm";
+    }
+
+    @PostMapping("/{itemId}/edit")
+    public String editItem(
+            @PathVariable Long itemId,
+            @ModelAttribute Item item
+    ) {
+        itemRepository.update(itemId, item);
+
+        return "redirect:/basic/items/{itemId}";
     }
 }
