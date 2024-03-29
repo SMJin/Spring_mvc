@@ -83,3 +83,28 @@ ObjectError reject("totalPriceMin")
 - 그리고 화면에서는 ....
 - 타임리프 화면을 렌더링 할 때 th:errors 가 실행되면서,
 - 지정한 *{특정object의 field명}에 대한 오류 메시지를 자세한 코드부터 찾아서 출력한다.
+
+##### Validator
+- 아니.. 검증코드가 너무너무 길어졌다!
+- 이걸 컨트롤러 로직에 다 넣기에는 .. 메인 로직이 너무 부각이 안돼!
+- 그렇다면 분리해야지! 검증 클래스를 따로 만들어서 주입시키면 될거야 ~
+1. ItemValidator 같이 @Component를 생성한 이후에, Validator를 implements 해준다.
+2. supports() 메소드를 이용해서 Item Class를 매칭시켜준다
+3. validate() 메소드 내부에 검증 로직을 넣는다.
+4. 검증을 추가할 Controller 상단에 주입시킨다. 다음과 같이!!
+```java
+private final ItemValidator itemValidator;
+
+@InitBinder
+public void init(WebDataBinder dataBinder) {
+    log.info("init binder {}", dataBinder);
+    dataBinder.addValidators(itemValidator);
+}
+```
+5. 그리고... 검증을 할 Model이 있는 컨트롤러 메소드에 다음과 같이 파라미터를 넘겨준다...
+```java
+@Validated @ModelAttribute Item item, BindingResult bindingResult,
+```
+6. 그렇다... 핵심은 @Validated 이다 !!!!!!!!!!!!@!
+- > @Validated 는 검증기를 실행하라는 애노테이션이다.
+- > supports(Item.class) 호출되고, 결과가 true 이므로 ItemValidator 의 validate() 가 호출
