@@ -1,2 +1,4 @@
-package hello.itemservice.domain.item;public interface SaveCheck {
+package hello.itemservice.domain.item;
+
+public interface SaveCheck {
 }
