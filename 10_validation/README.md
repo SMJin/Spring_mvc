@@ -54,6 +54,32 @@ new FieldError("item", "quantity", item.getQuantity(), false, null, null, "수�
 - > field : 오류 필드
 - > rejectedValue : 사용자가 입력한 값(거절된 값)
 - > bindingFailure : 타입 오류 같은 바인딩 실패인지, 검증 실패인지 구분 값
-- > codes : 메시지 코드
-- > arguments : 메시지에서 사용하는 인자
+- > codes : 메시지 코드 (errors.properties 에 저장한 에러 문자열들.) String[]{...}
+- > arguments : 메시지에서 사용하는 인자 (codes에서 사용하는 params) Obejct[]{...}
 - > defaultMessage : 기본 오류 메시지
+
+##### BindingResult 의 비밀
+1. 이미 Object가 무엇인지 알고 있다!
+> @ModelAttribute exam_model, BindingResult br 이런식으로 파라미터를 넘기면 bindingResult가 관리해야 할 object 는 자동으로 exam_model로 지정된다.
+2. 그래서 bindingResult.rejectValue("Object의 field명", "에러메시지 최상단값") 만 해도 해당 Object의 오류 메시지 반환이 가능하다!
+> 이게 가능한 이유... 바로 BindingResult가 MessageCodesResolver를 사용하기 때문 ..!
+
+##### MessageCodesResolver
+```java
+FieldError rejectValue("itemName", "required")
+```
+- 다음 4가지 오류 코드를 자동으로 생성
+- > required.item.itemName
+- > required.itemName
+- > required.java.lang.String
+- > required
+```java
+ObjectError reject("totalPriceMin")
+```
+- 다음 2가지 오류 코드를 자동으로 생성
+- > totalPriceMin.item
+- > totalPriceMin
+
+- 그리고 화면에서는 ....
+- 타임리프 화면을 렌더링 할 때 th:errors 가 실행되면서,
+- 지정한 *{특정object의 field명}에 대한 오류 메시지를 자세한 코드부터 찾아서 출력한다.
