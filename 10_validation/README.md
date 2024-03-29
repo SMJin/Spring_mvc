@@ -108,3 +108,18 @@ public void init(WebDataBinder dataBinder) {
 6. 그렇다... 핵심은 @Validated 이다 !!!!!!!!!!!!@!
 - > @Validated 는 검증기를 실행하라는 애노테이션이다.
 - > supports(Item.class) 호출되고, 결과가 true 이므로 ItemValidator 의 validate() 가 호출
+
+
+###### 다음과 같이 글로벌로 Validator를 등록도 가능하다.
+```java
+@SpringBootApplication
+public class ItemServiceApplication implements WebMvcConfigurer {
+ public static void main(String[] args) {
+ SpringApplication.run(ItemServiceApplication.class, args);
+ }
+ @Override
+ public Validator getValidator() {
+ return new ItemValidator();
+ }
+}
+```
