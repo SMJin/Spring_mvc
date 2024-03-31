@@ -124,3 +124,89 @@ public class WebConfig implements WebMvcConfigurer {
 - 서블릿 필터에 비해 코드가 상당히 간결하다.
 - chain.doFilter를 매번 계속 호출해주어야 체인 연결이 되는 Filter와 다르게 그럴 필요가 없다.
 - 인터셉터를 적용하지 않을 부분은 excludePathPatterns를 이용해서 쉽게 할 수 있다. (whitelist 따로 만들 필요가 없다.)
+
+## 부록. ArgumentResolver 활용.
+##### ArgumentResolver 란?
+- 자자.. 복습을 해봅시다. Controller 에서 파라미터들을 처리해주는 게 바로 ArgumentResolver 였습니다.
+> 이때 파라미터(argument)의 종류는 다양하겠죠. HttpServletRequest 부터 시작해서 @ModelAttribute 등등등 ...
+- RequestMappingHandlerAdaptor, 즉 @ReqeustMapping 핸들러 어댑터는 ArgumentResolver를 호출해서 컨트롤러(핸들러)가 필요한 argument들을 준비해서 넘긴다.
+> ArgumentResolver, 정확하게는 HandlerMethodArgumentResolver interface에는 다양한 resolveArgument 객체를 가지고 있다.
+```java
+public interface HandlerMethodArgumentResolver {
+    boolean supportsParameter(MethodParameter var1);
+
+    @Nullable
+    Object resolveArgument(MethodParameter var1, @Nullable ModelAndViewContainer var2, NativeWebRequest var3, @Nullable WebDataBinderFactory var4) throws Exception;
+}
+```
+
+##### ArgumentResolver 동작방식
+1. ArgumentResolver 의 supportsParameter() 를 호출
+2. 해당 파라미터를 지원하는지 체크
+3. 지원하면 resolveArgument() 를 호출해서 실제 객체를 생성
+4. 생성된 객체 컨트롤러 호출시 넘기기
+
+##### 참고. ReturnValueHandler
+- HandlerMethodReturnValueHandler 를 줄여서 ReturnValueHandler 라 부른다.
+- ArgumentResolver 와 비슷한데, 이것은 ***응답 값***을 변환하고 처리한다.
+
+### 나만의 Custom ArgumentResolver 만들기.
+
+##### 1. Custom Annotation 만들기
+```java
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Login {}
+```
+- 먼저 Annotation을 만들어준다.
+- 해당 어노테이션을 사용할 곳에  사용하는 방법은 다음과 같다.
+```java
+public void method(@Login Member loginMember) { ... }
+```
+- 그냥 어노테이션과 함께 원하는 argument를 호출해주면 된다.
+
+2. HandlerMethodArgumentResolver, 즉 스프링이 읽어올 수 있게 **ArgumentResolver로 등록**해주어야 한다.
+```java
+@Slf4j
+public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+    @Override
+    public boolean supportsParameter(MethodParameter methodParameter) {
+        log.info("supportsParameter 실행");
+
+        boolean hasLoginAnnotation = methodParameter.hasParameterAnnotation(Login.class);
+        boolean hasMemberType = Member.class.isAssignableFrom(methodParameter.getParameterType());
+
+        return hasLoginAnnotation && hasMemberType;
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
+        log.info("resolveArgument");
+
+        HttpServletRequest request = (HttpServletRequest) nativeWebRequest.getNativeRequest();
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+
+        return session.getAttribute(SessionConst.LOGIN_MEMBER);
+    }
+}
+```
+- 먼저 HandlerMethodArgumentResolver 를 implements 해주어야 한다.
+- supprotsParameter(MethodParameter) 메소드 내에서는 내가 원하는 파라미터가 들어왔는지 확인해주는 작업을 한다.
+- > 여기서 아까 내가 만든 @Login 어노테이션이 맞는지 확인해주어야 한다.
+- > 그 뿐만이 아니라, 내가 원하는 타입의 파라미터가 들어왔는지 확인해주어야 한다.
+- resolveArgument(MethodParameter, ...) 메소드 내에서는 들어온 파라미터가 어떤 형식(Object 지정)으로 반환되었으면 좋겠는지 작성하고 return 해주면 된다.
+
+3. WebConfig에 등록해주어야 한다.
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(new LoginMemberArgumentResolver());
+    }
+}
+```
+- addArgumentResolvers 메소드를 상속받아서 List<HandlerMethodArgumentResolver> resolvers 리스트에 내가 만든 리졸버를 추가해 주어야 한다.
