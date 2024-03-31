@@ -210,3 +210,6 @@ public class WebConfig implements WebMvcConfigurer {
 }
 ```
 - addArgumentResolvers 메소드를 상속받아서 List<HandlerMethodArgumentResolver> resolvers 리스트에 내가 만든 리졸버를 추가해 주어야 한다.
+
+
+###### 참고문서 [스프링이 제공하는 다양한 유틸성 클래스들(StringUtils 등)](https://mangkyu.tistory.com/238)
