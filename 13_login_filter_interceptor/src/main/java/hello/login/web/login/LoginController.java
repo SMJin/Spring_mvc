@@ -34,7 +34,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String loginForm(@Validated @ModelAttribute("loginForm") LoginForm form, BindingResult bindingResult,
+    public String loginFormV3(@Validated @ModelAttribute("loginForm") LoginForm form, BindingResult bindingResult,
                               HttpServletRequest request) {
         if (bindingResult.hasErrors()) {
             return "login/loginForm";
@@ -56,8 +56,20 @@ public class LoginController {
         return "redirect:/";
     }
 
+//    @PostMapping("/logout")
+//    public String logout(HttpServletResponse response) {
+//        expireCookie(response, "memberId");
+//        return "redirect:/";
+//    }
+
+//    @PostMapping("/logout")
+//    public String logoutV2(HttpServletRequest request) {
+//        sessionManager.expire(request);
+//        return "redirect:/";
+//    }
+
     @PostMapping("/logout")
-    public String logout(HttpServletRequest request) {
+    public String logoutV3(HttpServletRequest request) {
         // create 파라미터가 false 이면 세션이 없을 때 새로운 세션을 만들지 않는다.
         HttpSession session = request.getSession(false);
         if (session != null) {
