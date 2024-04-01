@@ -1,7 +1,7 @@
 # API 예외 처리
 
 ###### 복습부터 합시다.
-### HTTP message body에 직접 담아서 요청을 보내는 방식에 대하여 (API)
+## HTTP message body에 직접 담아서 요청을 보내는 방식에 대하여 (API)
 
 1. InputStream, OutputStream 을 통해서 Http message body의 데이터를 읽을 수 있다.
 - 스프링 MVC는 다음 파라미터를 지원한다.
@@ -194,5 +194,43 @@ public HelloData responseBodyJsonV2() {
   helloData.setUsername("userA");
   helloData.setAge(20);
   return helloData;
+}
+```
+###### 서론(복습) 끝. 예외처리, 진짜 시작!
+## Servlet 에서 제공하는 에러 페이지를 이용해서 API 에러 처리하기
+- WebServerFactoryCustomizer<ConfigurableWebServerFactory> interface 를 상속받아서 예외가 발생했을 때 어디로 갈지 url을 지정해준다.
+> WebServerFactoryCustomizer interface 살펴보기
+```java
+@FunctionalInterface
+public interface WebServerFactoryCustomizer<T extends WebServerFactory> {
+    void customize(T factory);
+}
+```
+> 상속받아서 각 에러 HttpStatus 별로 보내고 싶은 곳으로 연결 시켜주기.
+```java
+@Component
+public class WebServerCustomizer implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+  @Override
+  public void customize(ConfigurableWebServerFactory factory) {
+    ErrorPage errorPage404 = new ErrorPage(HttpStatus.NOT_FOUND, "/errorpage/404");
+    ErrorPage errorPage500 = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/error-page/500");
+    ErrorPage errorPageEx = new ErrorPage(RuntimeException.class, "/errorpage/500");
+    factory.addErrorPages(errorPage404, errorPage500, errorPageEx);
+  }
+}
+```
+- 그런데 이렇게까지만 해주면, Servlet 에서는 자동으로 /error-page/ 폴더 하위에 있는 404.html 혹은 500.html 페이지 등으로 자동 연결해준다.
+- 즉, API 통신을 선택한 우리에게 html 반환을 해준다는 뜻이다. 그러면 안되지 않은가!
+- 그래서 다음과 같이 produces = JSON 타입을 연결해주면 JSON API 반환이 가능하다.
+```java
+@RequestMapping(value = "/error-page/500", produces = MediaType.APPLICATION_JSON_VALUE)
+public ResponseEntity<Map<String, Object>> errorPage500Api(HttpServletRequest request, HttpServletResponse response) {
+  log.info("API errorPage 500");
+  Map<String, Object> result = new HashMap<>();
+  Exception ex = (Exception) request.getAttribute(ERROR_EXCEPTION);
+  result.put("status", request.getAttribute(ERROR_STATUS_CODE));
+  result.put("message", ex.getMessage());
+  Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+  return new ResponseEntity(result, HttpStatus.valueOf(statusCode));
 }
 ```
