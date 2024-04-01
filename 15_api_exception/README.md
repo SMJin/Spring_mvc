@@ -219,9 +219,7 @@ public class WebServerCustomizer implements WebServerFactoryCustomizer<Configura
   }
 }
 ```
-- 그런데 이렇게까지만 해주면, Servlet 에서는 자동으로 /error-page/ 폴더 하위에 있는 404.html 혹은 500.html 페이지 등으로 자동 연결해준다.
-- 즉, API 통신을 선택한 우리에게 html 반환을 해준다는 뜻이다. 그러면 안되지 않은가!
-- 그래서 다음과 같이 produces = JSON 타입을 연결해주면 JSON API 반환이 가능하다.
+- 그런데 이렇게까지만 해주면, Servlet 에서는 자동으로 /error-page/ 폴더 하위에 있는 404.html 혹은 500.html 페이지 등으로 자동 연결해준다. 즉, API 통신을 선택한 우리에게 html 반환을 해준다는 뜻이다. 그러면 안되지 않은가! 그래서 다음과 같이 produces = JSON 타입을 연결해주면 JSON API 반환이 가능하다.
 ```java
 @RequestMapping(value = "/error-page/500", produces = MediaType.APPLICATION_JSON_VALUE)
 public ResponseEntity<Map<String, Object>> errorPage500Api(HttpServletRequest request, HttpServletResponse response) {
