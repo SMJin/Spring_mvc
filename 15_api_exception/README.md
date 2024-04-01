@@ -220,6 +220,7 @@ public class WebServerCustomizer implements WebServerFactoryCustomizer<Configura
 }
 ```
 - 그런데 이렇게까지만 해주면, Servlet 에서는 자동으로 /error-page/ 폴더 하위에 있는 404.html 혹은 500.html 페이지 등으로 자동 연결해준다. 즉, API 통신을 선택한 우리에게 html 반환을 해준다는 뜻이다. 그러면 안되지 않은가! 그래서 다음과 같이 produces = JSON 타입을 연결해주면 JSON API 반환이 가능하다.
+- 다만!! 요청을 받은 클라이언트 쪽에서 Accept : application/json 타입으로 받아야 한다.
 ```java
 @RequestMapping(value = "/error-page/500", produces = MediaType.APPLICATION_JSON_VALUE)
 public ResponseEntity<Map<String, Object>> errorPage500Api(HttpServletRequest request, HttpServletResponse response) {
@@ -230,5 +231,25 @@ public ResponseEntity<Map<String, Object>> errorPage500Api(HttpServletRequest re
   result.put("message", ex.getMessage());
   Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
   return new ResponseEntity(result, HttpStatus.valueOf(statusCode));
+}
+```
+## Spring Boot 에서 제공하는 기본 예외 처리
+- BasicErrorController가 기본적으로 모든 기능을 자동으로 해준다.
+```java
+@Controller
+@RequestMapping({"${server.error.path:${error.path:/error}}"})
+public class BasicErrorController extends AbstractErrorController {
+  /*
+   * errorHtml() : produces = MediaType.TEXT_HTML_VALUE :
+   * 클라이언트 요청의 Accept 해더 값이 text/html 인 경우에는 errorHtml() 을 호출해서 view를 제공한다.
+   */
+  @RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
+  public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {}
+
+  /*
+   *  error() : 그외 경우에 호출되고 ResponseEntity 로 HTTP Body에 JSON 데이터를 반환한다
+   */
+  @RequestMapping
+  public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {} 
 }
 ```
