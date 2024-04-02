@@ -301,3 +301,28 @@ public class WebConfig implements WebMvcConfigurer {
 }
 
 ```
+
+## Spring 에서 제공하는 ExceptionResolver
+- 스프링 부트가 기본으로 제공하는 ExceptionResolver 는 다음과 같다. (HandlerExceptionResolverComposite 에 다음 순서로 등록)
+1. ExceptionHandlerExceptionResolver
+```java
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+@ExceptionHandler(IllegalArgumentException.class)
+public ErrorResult illegalExHandle(IllegalArgumentException e) {
+  log.error("[exceptionHandle] ex", e);
+  return new ErrorResult("BAD", e.getMessage());
+}
+```
+2. ResponseStatusExceptionResolver
+```java
+/* 어노테이션으로 지정 */
+@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "잘못된 요청 오류")
+```
+```java
+/* throw new 를 이용해서 직접 클래스를 호출한다. */
+@GetMapping("/api/response-status-ex2")
+public String responseStatusEx2() {
+    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "error.bad", new IllegalArgumentException());
+}
+```
+3. DefaultHandlerExceptionResolver 우선 순위가 가장 낮다. => 스프링 내부에서 기본적을 예외를 처리하는 부분이다.
