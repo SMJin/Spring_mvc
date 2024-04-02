@@ -253,3 +253,51 @@ public class BasicErrorController extends AbstractErrorController {
   public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {} 
 }
 ```
+
+## API 예외처리 :: HandlerExceptionResolver
+- Spring MVC 의 인터셉터는 preHandler -> controller -> postHandler -> afterCompletion 을 거쳐서 요청을 처리한다.
+- 이때, 에러가 발생하면 postHandler는 발생하지 않고, HandlerExceptionResolver를 등록해주면 에러 처리를 할 수 있다.
+```java
+/*
+ * handler : 핸들러(컨트롤러) 정보
+ * Exception ex : 핸들러(컨트롤러)에서 발생한 발생한 예외
+ */
+public interface HandlerExceptionResolver {
+  ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
+}
+```
+- 위의 인터페이스가 바로 HandlerExceptionResolver인데, 이 인터페이스를 상속받아서 예외 리졸버를 지정해주면 예외 처리를 할 수 있다.
+```java
+@Slf4j
+public class MyHandlerExceptionResolver implements HandlerExceptionResolver {
+  @Override
+  public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+  try {
+    if (ex instanceof IllegalArgumentException) {
+      log.info("IllegalArgumentException resolver to 400");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+      return new ModelAndView();
+    }  
+  } catch (IOException e) {
+    log.error("resolver ex", e);
+  }
+    return null;
+  }
+}
+```
+- 반환 값에 따른 동작 방식
+- > 빈 ModelAndView: 뷰를 렌더링 하진 않고, 정상 흐름으로 서블릿이 리턴된다. (에러 반환이 되지 않는다.)
+- > ModelAndView 지정: ModelAndView 에 View , Model 등의 정보를 지정해서 반환하면 뷰를 렌더링 한다.
+- > null: null 을 반환하면, 다음 ExceptionResolver 를 찾아서 실행한다. (만약 처리할 수 있는 ExceptionResolver 가 없으면 예외 처리가 안되고, 기존에 발생한 예외를 서블릿 밖으로 던진다.)
+
+- 주의! HandlerExceptionResolver를 WebConfig에서 extendHandlerExceptionResolvers메소드에 등해주어야 동작한다.'
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(new MyHandlerExceptionResolver());
+    }
+}
+
+```
