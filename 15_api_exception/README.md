@@ -290,7 +290,7 @@ public class MyHandlerExceptionResolver implements HandlerExceptionResolver {
 - > ModelAndView 지정: ModelAndView 에 View , Model 등의 정보를 지정해서 반환하면 뷰를 렌더링 한다.
 - > null: null 을 반환하면, 다음 ExceptionResolver 를 찾아서 실행한다. (만약 처리할 수 있는 ExceptionResolver 가 없으면 예외 처리가 안되고, 기존에 발생한 예외를 서블릿 밖으로 던진다.)
 
-- 주의! HandlerExceptionResolver를 WebConfig에서 extendHandlerExceptionResolvers메소드에 등해주어야 동작한다.'
+- 주의! HandlerExceptionResolver를 WebConfig에서 extendHandlerExceptionResolvers메소드에 등록해주어야 동작한다.
 ```java
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -304,7 +304,8 @@ public class WebConfig implements WebMvcConfigurer {
 
 ## Spring 에서 제공하는 ExceptionResolver
 - 스프링 부트가 기본으로 제공하는 ExceptionResolver 는 다음과 같다. (HandlerExceptionResolverComposite 에 다음 순서로 등록)
-1. ExceptionHandlerExceptionResolver
+1. ① ExceptionHandlerExceptionResolver
+- @ExceptionHandler 라는 애노테이션을 사용
 ```java
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 @ExceptionHandler(IllegalArgumentException.class)
@@ -313,6 +314,25 @@ public ErrorResult illegalExHandle(IllegalArgumentException e) {
   return new ErrorResult("BAD", e.getMessage());
 }
 ```
+1. ② @ControllerAdvice / @RestControllerAdvice 
+- 해당 어노테이션을 붙인 클래스에 에러처리 핸들러들을 넣어주면 에러 처리를 글로벌(모든 핸들러에게 적용)하게 사용할 수 있다.
+- 대상을 지정할 수도 있는데 그 방법은 다음과 같다.
+```java
+// Target all Controllers annotated with @RestController
+@ControllerAdvice(annotations = RestController.class)
+public class ExampleAdvice1 {}
+
+// Target all Controllers within specific packages
+// 특정 패키지에만 적용할 수도 있다. 보통 이런식으로 사용한다.
+@ControllerAdvice("org.example.controllers")
+public class ExampleAdvice2 {}
+
+// Target all Controllers assignable to specific classes
+@ControllerAdvice(assignableTypes = {ControllerInterface.class,
+AbstractController.class})
+public class ExampleAdvice3 {} 
+```
+
 2. ResponseStatusExceptionResolver
 ```java
 /* 어노테이션으로 지정 */
@@ -326,3 +346,51 @@ public String responseStatusEx2() {
 }
 ```
 3. DefaultHandlerExceptionResolver 우선 순위가 가장 낮다. => 스프링 내부에서 기본적을 예외를 처리하는 부분이다.
+ - 스프링은 기본적으로 해당 클래스가 앵간한 500 예외처리를 400 예외로 바꿔준다.
+ - 예를들어, 파라미터 바인딩이 맞지 않아 발생하는 500 예외인 "TypeMismatchException" 는 사실 보통 사용자가 타입을 잘못 입력했을 때 주로 발생한다. 이런 경우의 예외들을 한데 모아서 400 에러로 반환해주는 역할을 하는 것이 바로 이 DefaultHandlerExceptionResolver 이다. 내부 구조를 보면 여러 예외 처리를 관리하고 있는 것을 알 수 있다.
+ -  API뿐만이 아니라 View 나 빈 ModelAndView 등도 반환할 수 있지만, 대부분 RESTapi를 위해서 사용한다.
+```java
+public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
+    public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
+    protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
+
+    public DefaultHandlerExceptionResolver() {
+        this.setOrder(Integer.MAX_VALUE);
+        this.setWarnLogCategory(this.getClass().getName());
+    }
+
+    @Nullable
+    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
+        try {
+            if (ex instanceof ErrorResponse errorResponse) {
+                ModelAndView mav = null;
+                if (ex instanceof HttpRequestMethodNotSupportedException theEx) {
+                    mav = this.handleHttpRequestMethodNotSupported(theEx, request, response, handler);
+                } else if (ex instanceof HttpMediaTypeNotSupportedException theEx) {
+                    mav = this.handleHttpMediaTypeNotSupported(theEx, request, response, handler);
+                } else if (ex instanceof HttpMediaTypeNotAcceptableException theEx) {
+                    mav = this.handleHttpMediaTypeNotAcceptable(theEx, request, response, handler);
+                } else if (ex instanceof MissingPathVariableException theEx) {
+                    mav = this.handleMissingPathVariable(theEx, request, response, handler);
+                } else if (ex instanceof MissingServletRequestParameterException theEx) {
+                    mav = this.handleMissingServletRequestParameter(theEx, request, response, handler);
+                } else if (ex instanceof MissingServletRequestPartException theEx) {
+                    mav = this.handleMissingServletRequestPartException(theEx, request, response, handler);
+                } else if (ex instanceof ServletRequestBindingException theEx) {
+                    mav = this.handleServletRequestBindingException(theEx, request, response, handler);
+                } else if (ex instanceof MethodArgumentNotValidException theEx) {
+                    mav = this.handleMethodArgumentNotValidException(theEx, request, response, handler);
+                } else if (ex instanceof HandlerMethodValidationException theEx) {
+                    mav = this.handleHandlerMethodValidationException(theEx, request, response, handler);
+                } else if (ex instanceof NoHandlerFoundException theEx) {
+                    mav = this.handleNoHandlerFoundException(theEx, request, response, handler);
+                } else if (ex instanceof NoResourceFoundException theEx) {
+                    mav = this.handleNoResourceFoundException(theEx, request, response, handler);
+                } else if (ex instanceof AsyncRequestTimeoutException theEx) {
+                    mav = this.handleAsyncRequestTimeoutException(theEx, request, response, handler);
+                }\
+
+.
+.
+.
+```
